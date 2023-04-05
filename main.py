@@ -12,7 +12,6 @@ from aiogram.contrib.fsm_storage.memory import MemoryStorage
 from apscheduler.schedulers.asyncio import AsyncIOScheduler
 
 storage = MemoryStorage()
-token = "6121456100:AAHe-3UOoakDUqvckJejyXBzK8NV5zOESdg"
 bot = Bot(token)  # =os.environ["TOKEN"])
 dp = Dispatcher(bot, storage=storage)
 
