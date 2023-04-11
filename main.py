@@ -12,6 +12,7 @@ from aiogram.contrib.fsm_storage.memory import MemoryStorage
 from apscheduler.schedulers.asyncio import AsyncIOScheduler
 
 storage = MemoryStorage()
+token = "6121456100:AAHe-3UOoakDUqvckJejyXBzK8NV5zOESdg"
 bot = Bot(token)  # =os.environ["TOKEN"])
 dp = Dispatcher(bot, storage=storage)
 
@@ -99,7 +100,7 @@ async def del_record(
     await message.answer("Запись отменена!")
 
 
-@dp.message_handler(state=Reg.record, text="Список на стирку")
+@dp.message_handler(state=Reg.record, text="Список записей на стирку")
 async def lists_wash(message: types.Message):
     lists = await list_wash()
     await message.answer("Список на стирку: \n" + lists)

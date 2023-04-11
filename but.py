@@ -8,7 +8,7 @@ from aiogram.types import (
 b1 = KeyboardButton("Записаться на стирку")
 b2 = KeyboardButton("Мои записи")
 b3 = KeyboardButton("Отмена записи")
-b4 = KeyboardButton("Список на стирку")
+b4 = KeyboardButton("Список записей на стирку")
 
 keybrd = ReplyKeyboardMarkup(resize_keyboard=True)
 
