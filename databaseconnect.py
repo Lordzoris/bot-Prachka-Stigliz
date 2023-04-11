@@ -35,13 +35,13 @@ async def add_record(time, tid) -> Union[bool, int]:
     conn = sqlite3.connect("database.db")
     cursor = conn.cursor()
     select_id = cursor.execute(
-        "SELECT id FROM zapis;",
+        "SELECT id FROM zapis where id like ?;", (tid,)
     ).fetchall()
     if not select_id:
         today = datetime.date.today()
         tomorrow = today + datetime.timedelta(days=1)
-        day = str(tomorrow.day).zfill(2)  # добавляем ноль, если день меньше 10
-        month = str(tomorrow.month).zfill(2)  # добавляем ноль, если месяц меньше 10
+        day = str(tomorrow.day).zfill(2)  # добавляем нуль, если день меньше 10
+        month = str(tomorrow.month).zfill(2)  # добавляем нуль, если месяц меньше 10
         date_str = f"{day}.{month}"
         cursor.execute(
             "INSERT INTO zapis (time, date, id) VALUES (?, ?, ?);",
@@ -109,7 +109,7 @@ async def list_wash():
     conn = sqlite3.connect("database.db")
     cursor = conn.cursor()
     select = cursor.execute(
-        "SELECT name, number, time, date FROM users, zapis where users.id = zapis.id ORDER BY time ASC;"
+        "SELECT name, number, time, date FROM users, zapis WHERE users.id = zapis.id ORDER BY time ASC;"
     ).fetchall()
     conn.close()
     schedule = {}
