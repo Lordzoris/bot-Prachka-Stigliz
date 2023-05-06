@@ -3,7 +3,7 @@ import os
 
 import databaseconnect
 from databaseconnect import *
-from but import keybrd, inlinekb1
+from but import keybrd, inlinekb1, inlinekb2
 from aiogram import Bot, types
 from aiogram.dispatcher import Dispatcher, FSMContext
 from aiogram.utils import executor
@@ -93,7 +93,7 @@ async def process_callback(callback_query: types.CallbackQuery):
 @dp.message_handler(state=Reg.record, text="Записаться на сегодня")
 async def get_record_today(message: types.Message):
     await Reg.record_today.set()
-    await message.answer("Выберите время записи:", reply_markup=inlinekb1)
+    await message.answer("Выберите время записи:", reply_markup=inlinekb2)
 
 
 @dp.callback_query_handler(state=Reg.record_today)
