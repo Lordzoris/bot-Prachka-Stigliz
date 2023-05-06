@@ -173,7 +173,7 @@ async def list_wash():
 async def change_number(tid, number):
     conn = sqlite3.connect("database.db")
     cursor = conn.cursor()
-    update = cursor.execute(
+    cursor.execute(
         "UPDATE users SET number = ?  WHERE id LIKE ?;", (number, tid,)
     )
     conn.commit()
