@@ -168,7 +168,7 @@ async def list_wash():
 
     result = ""
     for date in sorted(schedule.keys()):
-        result += f"{date}\n"
+        result += f"\n{date}\n"
         for time in sorted(schedule[date].keys()):
             result += f"В {time} записаны:\n"
             for name, num in schedule[date][time]:
