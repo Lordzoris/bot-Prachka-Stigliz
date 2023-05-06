@@ -5,14 +5,16 @@ from aiogram.types import (
     InlineKeyboardButton,
 )
 
-b1 = KeyboardButton("Записаться на стирку")
-b2 = KeyboardButton("Мои записи")
+b1 = KeyboardButton("Записаться на завтра")
+b2 = KeyboardButton("Записаться на сегодня")
 b3 = KeyboardButton("Отмена записи")
 b4 = KeyboardButton("Список записей на стирку")
+b5 = KeyboardButton("Изменить номер комнаты")
+b6 = KeyboardButton("Мои записи")
 
 keybrd = ReplyKeyboardMarkup(resize_keyboard=True)
 
-keybrd.add(b1).insert(b2).add(b3).insert(b4)
+keybrd.add(b1).insert(b2).add(b3).insert(b4).add(b5).insert(b6)
 
 i1 = InlineKeyboardButton("19:00-20:00", callback_data="19:00-20:00")
 i2 = InlineKeyboardButton("20:00-21:00", callback_data="20:00-21:00")
