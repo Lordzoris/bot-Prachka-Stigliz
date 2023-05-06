@@ -21,6 +21,9 @@ class Reg(StatesGroup):
     name = State()
     room = State()
     record = State()
+    changes = State()
+    record_tomorrow = State()
+    record_today = State()
 
 
 @dp.message_handler(commands=["start"])
@@ -58,16 +61,45 @@ async def get_room(message: types.Message, state: FSMContext):
         await Reg.next()
 
 
-@dp.message_handler(state=Reg.record, text="Записаться на стирку")
-async def get_record(
-    message: types.Message,
-):
+@dp.message_handler(state=Reg.record, text="Записаться на завтра")
+async def get_record(message: types.Message):
+    now_full = datetime.datetime.now()
+    hour = now_full.hour
+    if hour < 21:
+        await message.answer("Сейчас записаться на стирку нельзя. Запись начинается с 21:00")
+    else:
+        await Reg.record_tomorrow.set()
+        await message.answer("Выберите время записи:", reply_markup=inlinekb1)
+
+
+@dp.callback_query_handler(state=Reg.record_tomorrow)
+async def process_callback(callback_query: types.CallbackQuery):
+    res = await add_record_tomorrow(callback_query.data, callback_query.from_user.id)
+    await Reg.record.set()
+    if res == 0:
+        await bot.send_message(
+            callback_query.from_user.id, f"Мест на стирку на это время больше нет."
+        )
+    elif res == 1:
+        await bot.send_message(callback_query.from_user.id, f"Вы записались на стирку!")
+    else:
+        await bot.send_message(
+            callback_query.from_user.id,
+            f"Вы уже записаны на стирку, записаться можно только на один временной слот.",
+        )
+    await Reg.record.set()
+
+
+@dp.message_handler(state=Reg.record, text="Записаться на сегодня")
+async def get_record_today(message: types.Message):
+    await Reg.record_today.set()
     await message.answer("Выберите время записи:", reply_markup=inlinekb1)
 
 
-@dp.callback_query_handler(state=Reg.record)
+@dp.callback_query_handler(state=Reg.record_today)
 async def process_callback(callback_query: types.CallbackQuery):
-    res = await add_record(callback_query.data, callback_query.from_user.id)
+    res = await add_record_today(callback_query.data, callback_query.from_user.id)
+    await Reg.record.set()
     if res == 0:
         await bot.send_message(
             callback_query.from_user.id, f"Мест на стирку на это время больше нет."
@@ -83,7 +115,7 @@ async def process_callback(callback_query: types.CallbackQuery):
 
 @dp.message_handler(state=Reg.record, text="Мои записи")
 async def check_record(
-    message: types.Message,
+        message: types.Message,
 ):
     res = await check_record_user(message.from_user.id)
     if not res:
@@ -94,7 +126,7 @@ async def check_record(
 
 @dp.message_handler(state=Reg.record, text="Отмена записи")
 async def del_record(
-    message: types.Message,
+        message: types.Message,
 ):
     await delete_record(message.from_user.id)
     await message.answer("Запись отменена!")
@@ -106,13 +138,31 @@ async def lists_wash(message: types.Message):
     await message.answer("Список на стирку: \n" + lists)
 
 
+@dp.message_handler(state=Reg.record, text="Изменить номер комнаты")
+async def changes_number(message: types.Message, state: FSMContext):
+    await message.answer("Введите новый номер комнаты:")
+    await Reg.changes.set()
+
+
+@dp.message_handler(state=Reg.changes)
+async def changes_number_room(message: types.Message, state: FSMContext):
+    async with state.proxy() as data:
+        data["number"] = message.text
+        if not message.text.isdigit():
+            await message.answer("Номер комнаты должен состоять из цифр")
+            return
+    await change_number(message.from_user.id, data["number"])
+    await message.answer("Номер комнаты изменён!")
+    await Reg.record.set()
+
+
 async def cleaning_db():
     scheduler = AsyncIOScheduler(timezone="Europe/Moscow")
     scheduler.add_job(
         databaseconnect.delete_old_record,
         trigger='cron',
-        #trigger="interval", проверка работы
-        #seconds=1,
+        # trigger="interval", проверка работы
+        # seconds=1,
         hour="00",
         start_date=datetime.datetime.now(),
     )
