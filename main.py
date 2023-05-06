@@ -3,7 +3,7 @@ import os
 
 import databaseconnect
 from databaseconnect import *
-from but import keybrd, inlinekb1, inlinekb2
+from but import keyboard, inline_keyboard1, inline_keyboard2
 from aiogram import Bot, types
 from aiogram.dispatcher import Dispatcher, FSMContext
 from aiogram.utils import executor
@@ -30,7 +30,7 @@ class Reg(StatesGroup):
 async def command_start(message: types.Message):
     a = types.ReplyKeyboardRemove()
     if await reg_test(message.from_user.id):
-        await message.answer("Привет!", reply_markup=keybrd)
+        await message.answer("Привет!", reply_markup=keyboard)
         await Reg.record.set()
     else:
         with open("replicas/hello.txt", "r", encoding="UTF-8") as f:
@@ -57,11 +57,11 @@ async def get_room(message: types.Message, state: FSMContext):
             return
 
         await reg_connect(message.from_user.id, data["name"], message.text)
-        await message.answer("Отлично, регистрация завершена!", reply_markup=keybrd)
+        await message.answer("Отлично, регистрация завершена!", reply_markup=keyboard)
         await Reg.next()
 
 
-@dp.message_handler(state=Reg.record, text="Записаться на завтра")
+@dp.message_handler(state=[Reg.record, Reg.record_tomorrow, Reg.record_today], text="Записаться на завтра")
 async def get_record(message: types.Message):
     now_full = datetime.datetime.now()
     hour = now_full.hour
@@ -69,11 +69,11 @@ async def get_record(message: types.Message):
         await message.answer("Сейчас записаться на стирку нельзя. Запись начинается с 21:00")
     else:
         await Reg.record_tomorrow.set()
-        await message.answer("Выберите время записи:", reply_markup=inlinekb1)
+        await message.answer("Выберите время записи на завтра:", reply_markup=inline_keyboard1)
 
 
 @dp.callback_query_handler(state=Reg.record_tomorrow)
-async def process_callback(callback_query: types.CallbackQuery):
+async def process_callback_tomorrow(callback_query: types.CallbackQuery):
     res = await add_record_tomorrow(callback_query.data, callback_query.from_user.id)
     await Reg.record.set()
     if res == 0:
@@ -90,14 +90,14 @@ async def process_callback(callback_query: types.CallbackQuery):
     await Reg.record.set()
 
 
-@dp.message_handler(state=Reg.record, text="Записаться на сегодня")
+@dp.message_handler(state=[Reg.record, Reg.record_tomorrow, Reg.record_today], text="Записаться на сегодня")
 async def get_record_today(message: types.Message):
     await Reg.record_today.set()
-    await message.answer("Выберите время записи:", reply_markup=inlinekb2)
+    await message.answer("Выберите время записи на сегодня:", reply_markup=inline_keyboard2)
 
 
 @dp.callback_query_handler(state=Reg.record_today)
-async def process_callback(callback_query: types.CallbackQuery):
+async def process_callback_today(callback_query: types.CallbackQuery):
     res = await add_record_today(callback_query.data, callback_query.from_user.id)
     await Reg.record.set()
     if res == 0:
@@ -113,7 +113,7 @@ async def process_callback(callback_query: types.CallbackQuery):
         )
 
 
-@dp.message_handler(state=Reg.record, text="Мои записи")
+@dp.message_handler(state=[Reg.record, Reg.record_tomorrow, Reg.record_today], text="Мои записи")
 async def check_record(
         message: types.Message,
 ):
@@ -124,7 +124,7 @@ async def check_record(
         await message.answer("Вы записаны на стирку на следующее время:\n" + str(res))
 
 
-@dp.message_handler(state=Reg.record, text="Отмена записи")
+@dp.message_handler(state=[Reg.record, Reg.record_tomorrow, Reg.record_today], text="Отмена записи")
 async def del_record(
         message: types.Message,
 ):
@@ -132,14 +132,14 @@ async def del_record(
     await message.answer("Запись отменена!")
 
 
-@dp.message_handler(state=Reg.record, text="Список записей на стирку")
+@dp.message_handler(state=[Reg.record, Reg.record_tomorrow, Reg.record_today], text="Список записей на стирку")
 async def lists_wash(message: types.Message):
     lists = await list_wash()
     await message.answer("Список на стирку: \n" + lists)
 
 
-@dp.message_handler(state=Reg.record, text="Изменить номер комнаты")
-async def changes_number(message: types.Message, state: FSMContext):
+@dp.message_handler(state=[Reg.record, Reg.record_tomorrow, Reg.record_today], text="Изменить номер комнаты")
+async def changes_number(message: types.Message):
     await message.answer("Введите новый номер комнаты:")
     await Reg.changes.set()
 
@@ -161,8 +161,6 @@ async def cleaning_db():
     scheduler.add_job(
         databaseconnect.delete_old_record,
         trigger='cron',
-        # trigger="interval", проверка работы
-        # seconds=1,
         hour="00",
         start_date=datetime.datetime.now(),
     )

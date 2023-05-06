@@ -156,17 +156,23 @@ async def list_wash():
     ).fetchall()
     conn.close()
     schedule = {}
+    if not select:
+        return "Нет записей"
     for item in select:
         name, num, interval, date = item
-        if interval not in schedule:
-            schedule[interval] = []
-        schedule[interval].append((name, num))
+        if date not in schedule:
+            schedule[date] = {}
+        if interval not in schedule[date]:
+            schedule[date][interval] = []
+        schedule[date][interval].append((name, num))
 
     result = ""
-    for time in sorted(schedule.keys()):
-        result += "\nВ " + time + " записаны:\n"
-        for name, num in schedule[time]:
-            result += f"{name} {num}\n"
+    for date in sorted(schedule.keys()):
+        result += f"{date}\n"
+        for time in sorted(schedule[date].keys()):
+            result += f"В {time} записаны:\n"
+            for name, num in schedule[date][time]:
+                result += f"{name} {num}\n"
     return result
 
 
