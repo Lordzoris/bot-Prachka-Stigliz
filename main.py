@@ -3,7 +3,7 @@ import os
 
 import databaseconnect
 from databaseconnect import *
-from but import keyboard, inline_keyboard1, inline_keyboard2
+from but import keyboard1, keyboard2, inline_keyboard1, inline_keyboard2
 from aiogram import Bot, types
 from aiogram.dispatcher import Dispatcher, FSMContext
 from aiogram.utils import executor
@@ -30,7 +30,7 @@ class Reg(StatesGroup):
 async def command_start(message: types.Message):
     a = types.ReplyKeyboardRemove()
     if await reg_test(message.from_user.id):
-        await message.answer("Привет!", reply_markup=keyboard)
+        await message.answer("Привет!", reply_markup=keyboard1)
         await Reg.record.set()
     else:
         with open("replicas/hello.txt", "r", encoding="UTF-8") as f:
@@ -57,8 +57,17 @@ async def get_room(message: types.Message, state: FSMContext):
             return
 
         await reg_connect(message.from_user.id, data["name"], message.text)
-        await message.answer("Отлично, регистрация завершена!", reply_markup=keyboard)
+        await message.answer("Отлично, регистрация завершена!", reply_markup=keyboard1)
         await Reg.next()
+
+@dp.message_handler(state=Reg.record, text='Записаться на стирку')
+async def choose_record(message: types.Message):
+    await message.answer("Выберите день записи:", reply_markup=keyboard2)
+
+
+@dp.message_handler(state=[Reg.record, Reg.record_tomorrow, Reg.record_today], text='Назад')
+async def returns(message: types.Message):
+    await message.answer("Назад", reply_markup=keyboard1)
 
 
 @dp.message_handler(state=[Reg.record, Reg.record_tomorrow, Reg.record_today], text="Записаться на завтра")

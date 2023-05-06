@@ -6,16 +6,20 @@ from aiogram.types import (
 )
 import datetime
 
+b0 = KeyboardButton('Записаться на стирку')
 b1 = KeyboardButton("Записаться на завтра")
 b2 = KeyboardButton("Записаться на сегодня")
 b3 = KeyboardButton("Отмена записи")
 b4 = KeyboardButton("Список записей на стирку")
 b5 = KeyboardButton("Изменить номер комнаты")
 b6 = KeyboardButton("Мои записи")
+b7 = KeyboardButton('Назад')
 
-keyboard = ReplyKeyboardMarkup(resize_keyboard=True)
+keyboard1 = ReplyKeyboardMarkup(resize_keyboard=True)
+keyboard1.add(b0).insert(b3).add(b4).insert(b5).add(b6)
 
-keyboard.add(b1).insert(b2).add(b3).insert(b4).add(b5).insert(b6)
+keyboard2 = ReplyKeyboardMarkup(resize_keyboard=True)
+keyboard2.add(b1).insert(b2).add(b7)
 
 i1 = InlineKeyboardButton("19:00-20:00", callback_data="19:00-20:00")
 i2 = InlineKeyboardButton("20:00-21:00", callback_data="20:00-21:00")
