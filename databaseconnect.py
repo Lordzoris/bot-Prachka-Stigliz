@@ -28,7 +28,7 @@ async def reg_test(tid):
 async def get_count():
     conn = sqlite3.connect("database.db")
     cursor = conn.cursor()
-    cursor.execute("SELECT COUNT(time) FROM zapis;")
+    cursor.execute("SELECT COUNT(time) FROM records;")
     conn.close()
 
 
@@ -36,7 +36,7 @@ async def add_record_tomorrow(time, tid) -> Union[bool, int]:
     conn = sqlite3.connect("database.db")
     cursor = conn.cursor()
     select_id = cursor.execute(
-        "SELECT id FROM zapis where id like ?;", (tid,)
+        "SELECT id FROM records where id like ?;", (tid,)
     ).fetchall()
     if not select_id:
         today = datetime.date.today()
@@ -45,7 +45,7 @@ async def add_record_tomorrow(time, tid) -> Union[bool, int]:
         month = str(tomorrow.month).zfill(2)  # добавляем нуль, если месяц меньше 10
         date_str = f"{day}.{month}"
         cursor.execute(
-            "INSERT INTO zapis (time, date, id) VALUES (?, ?, ?);",
+            "INSERT INTO records (time, date, id) VALUES (?, ?, ?);",
             (time, date_str, tid),
         )
         conn.commit()
@@ -57,7 +57,7 @@ async def add_record_tomorrow(time, tid) -> Union[bool, int]:
             return 2
         else:
             counts = cursor.execute(
-                "SELECT COUNT(*) FROM zapis WHERE time LIKE ?;", (time,)
+                "SELECT COUNT(*) FROM records WHERE time LIKE ?;", (time,)
             ).fetchone()
             if counts[0] >= 5:
                 conn.close()
@@ -68,7 +68,7 @@ async def add_record_tomorrow(time, tid) -> Union[bool, int]:
             month = str(tomorrow.month).zfill(2)  # добавляем нуль, если месяц меньше 10
             date_str = f"{day}.{month}"
             cursor.execute(
-                "INSERT INTO zapis (time, date, id) VALUES (?, ?, ?);",
+                "INSERT INTO records (time, date, id) VALUES (?, ?, ?);",
                 (time, date_str, tid),
             )
             conn.commit()
@@ -80,7 +80,7 @@ async def add_record_today(time, tid) -> Union[bool, int]:
     conn = sqlite3.connect("database.db")
     cursor = conn.cursor()
     select_id = cursor.execute(
-        "SELECT id FROM zapis where id like ?;", (tid,)
+        "SELECT id FROM records where id like ?;", (tid,)
     ).fetchall()
     if not select_id:
         today = datetime.date.today()
@@ -88,7 +88,7 @@ async def add_record_today(time, tid) -> Union[bool, int]:
         month = str(today.month).zfill(2)  # добавляем нуль, если месяц меньше 10
         date_str = f"{day}.{month}"
         cursor.execute(
-            "INSERT INTO zapis (time, date, id) VALUES (?, ?, ?);",
+            "INSERT INTO records (time, date, id) VALUES (?, ?, ?);",
             (time, date_str, tid),
         )
         conn.commit()
@@ -100,7 +100,7 @@ async def add_record_today(time, tid) -> Union[bool, int]:
             return 2
         else:
             counts = cursor.execute(
-                "SELECT COUNT(*) FROM zapis WHERE time LIKE ?;", (time,)
+                "SELECT COUNT(*) FROM records WHERE time LIKE ?;", (time,)
             ).fetchone()
             if counts[0] >= 5:
                 conn.close()
@@ -110,7 +110,7 @@ async def add_record_today(time, tid) -> Union[bool, int]:
             month = str(today.month).zfill(2)  # добавляем нуль, если месяц меньше 10
             date_str = f"{day}.{month}"
             cursor.execute(
-                "INSERT INTO zapis (time, date, id) VALUES (?, ?, ?);",
+                "INSERT INTO records (time, date, id) VALUES (?, ?, ?);",
                 (time, date_str, tid),
             )
             conn.commit()
@@ -122,7 +122,7 @@ async def check_record_user(tid):
     conn = sqlite3.connect("database.db")
     cursor = conn.cursor()
     select_count = cursor.execute(
-        "SELECT COUNT(*) FROM zapis WHERE id LIKE ?;", (tid,)
+        "SELECT COUNT(*) FROM records WHERE id LIKE ?;", (tid,)
     ).fetchone()
     check = ""
     for selects in select_count:
@@ -131,7 +131,7 @@ async def check_record_user(tid):
             return False
         if str(selects) == "1":
             select = cursor.execute(
-                "SELECT time, id FROM zapis WHERE id like ?;", (tid,)
+                "SELECT time, id FROM records WHERE id like ?;", (tid,)
             ).fetchall()
             conn.close()
             for id in select:
@@ -143,7 +143,7 @@ async def check_record_user(tid):
 async def delete_record(tid):
     conn = sqlite3.connect("database.db")
     cursor = conn.cursor()
-    cursor.execute("DELETE FROM zapis WHERE id = ?;", (tid,))
+    cursor.execute("DELETE FROM records WHERE id = ?;", (tid,))
     conn.commit()
     conn.close()
 
@@ -152,7 +152,7 @@ async def list_wash():
     conn = sqlite3.connect("database.db")
     cursor = conn.cursor()
     select = cursor.execute(
-        "SELECT name, number, time, date FROM users, zapis WHERE users.id = zapis.id ORDER BY time ASC;"
+        "SELECT name, number, time, date FROM users, records WHERE users.id = records.id ORDER BY time ASC;"
     ).fetchall()
     conn.close()
     schedule = {}
@@ -190,7 +190,7 @@ async def delete_account(tid):
     conn = sqlite3.connect("database.db")
     cursor = conn.cursor()
     cursor.execute(
-            "DELETE FROM zapis WHERE id LIKE ?;", (tid,)
+            "DELETE FROM records WHERE id LIKE ?;", (tid,)
     )
     cursor.execute(
             "DELETE FROM users WHERE id LIKE ?;", (tid,)
@@ -207,7 +207,7 @@ async def delete_old_record():
     formatted_month = str(date_of_deletion.month).zfill(2)
     date_formatted = f'{formatted_date},{formatted_month}'
     cursor.execute(
-        "DELETE FROM zapis WHERE date < ?;",
+        "DELETE FROM records WHERE date < ?;",
         (date_formatted,)
     )
     conn.commit()
