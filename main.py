@@ -142,8 +142,12 @@ async def get_record(message: types.Message):
     if hour < 21:
         await message.answer("Сейчас записаться на стирку нельзя. Запись начинается с 21:00")
     else:
-        await Reg.record_tomorrow.set()
-        await message.answer("Выберите время записи на завтра:", reply_markup=inline_keyboard_record)
+        res = await check_record_user(message.from_user.id)
+        if not res:
+            await Reg.record_tomorrow.set()
+            await message.answer("Выберите время записи на завтра:", reply_markup=inline_keyboard_record)
+        else:
+            await message.answer("Вы уже записаны на стирку, записаться можно только на один временной слот.")
 
 
 @dp.callback_query_handler(state=Reg.record_tomorrow)
@@ -188,9 +192,7 @@ async def process_callback_today(callback_query: types.CallbackQuery):
 
 
 @dp.message_handler(state=[Reg.record, Reg.record_tomorrow, Reg.record_today], text="Мои записи")
-async def check_record(
-        message: types.Message,
-):
+async def check_record(message: types.Message):
     res = await check_record_user(message.from_user.id)
     if not res:
         await message.answer("Запись на стирку не найдена.")
@@ -199,9 +201,7 @@ async def check_record(
 
 
 @dp.message_handler(state=[Reg.record, Reg.record_tomorrow, Reg.record_today], text="Отмена записи")
-async def del_record(
-        message: types.Message,
-):
+async def del_record(message: types.Message):
     await delete_record(message.from_user.id)
     await message.answer("Запись отменена!")
 
