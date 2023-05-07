@@ -3,8 +3,9 @@ import os
 
 import databaseconnect
 from databaseconnect import *
-from but import keyboard1, keyboard2, inline_keyboard1, inline_keyboard2
+from but import keyboard_main, keyboard_record, inline_keyboard_record, inline_keyboard_record_today, keyboard_confirm, keyboard_change, keyboard_account
 from aiogram import Bot, types
+from aiogram.types import ReplyKeyboardRemove
 from aiogram.dispatcher import Dispatcher, FSMContext
 from aiogram.utils import executor
 from aiogram.dispatcher.filters.state import StatesGroup, State
@@ -20,17 +21,22 @@ dp = Dispatcher(bot, storage=storage)
 class Reg(StatesGroup):
     name = State()
     room = State()
+    confirm = State()
+    change_reg = State()
+    change_name = State()
+    change_number = State()
     record = State()
     changes = State()
     record_tomorrow = State()
     record_today = State()
+    deleted = State()
 
 
 @dp.message_handler(commands=["start"])
 async def command_start(message: types.Message):
     a = types.ReplyKeyboardRemove()
     if await reg_test(message.from_user.id):
-        await message.answer("Привет!", reply_markup=keyboard1)
+        await message.answer("Привет!", reply_markup=keyboard_main)
         await Reg.record.set()
     else:
         with open("replicas/hello.txt", "r", encoding="UTF-8") as f:
@@ -55,19 +61,78 @@ async def get_room(message: types.Message, state: FSMContext):
         if not message.text.isnumeric():
             await message.answer("Номер комнаты должен состоять из цифр")
             return
+        data["number"] = message.text
+        await Reg.confirm.set()
+        await message.answer(
+            f"Вы ввели:\nФамилия: {data['name']}\nНомер комнаты: {data['number']}\nВсё верно?",
+            reply_markup=keyboard_confirm)
 
-        await reg_connect(message.from_user.id, data["name"], message.text)
-        await message.answer("Отлично, регистрация завершена!", reply_markup=keyboard1)
-        await Reg.next()
+
+@dp.message_handler(state=Reg.confirm)
+async def confirm_data(message: types.Message, state: FSMContext):
+    async with state.proxy() as data:
+        if message.text.lower() == "да":
+            await reg_connect(message.from_user.id, data["name"], data["number"])
+            await message.answer("Отлично, регистрация завершена!", reply_markup=keyboard_main)
+            await Reg.record.set()
+        elif message.text.lower() == "нет":
+            await message.answer("Что нужно исправить?", reply_markup=keyboard_change)
+            await Reg.change_reg.set()
+
+
+@dp.message_handler(state=Reg.change_reg, text="Фамилию")
+async def change_name(message: types.Message):
+    await message.answer("Введите свою фамилию:")
+    await Reg.change_name.set()
+
+
+@dp.message_handler(state=Reg.change_name)
+async def confirm_name(message: types.Message, state: FSMContext):
+    if not message.text.isalpha():
+        await message.answer("Фамилия должна состоять из букв")
+        return
+    async with state.proxy() as data:
+        data['name'] = message.text
+    await message.answer(
+        f"Вы ввели:\nФамилия: {data['name']}\nНомер комнаты: {data['number']}\nВсё верно?",
+        reply_markup=keyboard_confirm)
+    await Reg.confirm.set()
+
+
+@dp.message_handler(state=Reg.change_reg, text="Номер комнаты")
+async def change_number(message: types.Message):
+    await message.answer("Введите номер комнаты:")
+    await Reg.change_number.set()
+
+
+@dp.message_handler(state=Reg.change_number)
+async def confirm_number(message: types.Message, state: FSMContext):
+    async with state.proxy() as data:
+        if not message.text.isnumeric():
+            await message.answer("Номер комнаты должен состоять из цифр")
+            return
+        data['number'] = message.text
+    await message.answer(
+        f"Вы ввели:\nФамилия: {data['name']}\nНомер комнаты: {data['number']}\nВсё верно?",
+        reply_markup=keyboard_confirm)
+    await Reg.confirm.set()
+
+@dp.message_handler(state=Reg.change_reg, text="Всё верно")
+async def confirm(message: types.Message, state: FSMContext):
+    async with state.proxy() as data:
+        await message.answer("Отлично, регистрация завершена!", reply_markup=keyboard_main)
+        await reg_connect(message.from_user.id, data["name"], data["number"])
+        await state.reset_state()
+        await Reg.record.set()
 
 @dp.message_handler(state=Reg.record, text='Записаться на стирку')
 async def choose_record(message: types.Message):
-    await message.answer("Выберите день записи:", reply_markup=keyboard2)
+    await message.answer("Выберите день записи:", reply_markup=keyboard_record)
 
 
 @dp.message_handler(state=[Reg.record, Reg.record_tomorrow, Reg.record_today], text='Назад')
 async def returns(message: types.Message):
-    await message.answer("Назад", reply_markup=keyboard1)
+    await message.answer('Назад в меню', reply_markup=keyboard_main)
 
 
 @dp.message_handler(state=[Reg.record, Reg.record_tomorrow, Reg.record_today], text="Записаться на завтра")
@@ -78,7 +143,7 @@ async def get_record(message: types.Message):
         await message.answer("Сейчас записаться на стирку нельзя. Запись начинается с 21:00")
     else:
         await Reg.record_tomorrow.set()
-        await message.answer("Выберите время записи на завтра:", reply_markup=inline_keyboard1)
+        await message.answer("Выберите время записи на завтра:", reply_markup=inline_keyboard_record)
 
 
 @dp.callback_query_handler(state=Reg.record_tomorrow)
@@ -102,7 +167,7 @@ async def process_callback_tomorrow(callback_query: types.CallbackQuery):
 @dp.message_handler(state=[Reg.record, Reg.record_tomorrow, Reg.record_today], text="Записаться на сегодня")
 async def get_record_today(message: types.Message):
     await Reg.record_today.set()
-    await message.answer("Выберите время записи на сегодня:", reply_markup=inline_keyboard2)
+    await message.answer("Выберите время записи на сегодня:", reply_markup=inline_keyboard_record_today)
 
 
 @dp.callback_query_handler(state=Reg.record_today)
@@ -160,9 +225,27 @@ async def changes_number_room(message: types.Message, state: FSMContext):
         if not message.text.isdigit():
             await message.answer("Номер комнаты должен состоять из цифр")
             return
-    await change_number(message.from_user.id, data["number"])
+    await change_room(message.from_user.id, data["number"])
     await message.answer("Номер комнаты изменён!")
     await Reg.record.set()
+
+
+@dp.message_handler(state=Reg.record, text='Аккаунт')
+async def choose_record(message: types.Message):
+    await message.answer("Выберите действие:", reply_markup=keyboard_account)
+
+
+@dp.message_handler(state=[Reg.record, Reg.record_tomorrow, Reg.record_today], text="Удалить мой аккаунт")
+async def delete_accounts(message: types.Message):
+    await delete_account(message.from_user.id)
+    await Reg.deleted.set()
+    await message.answer("Ваш аккаунт удалён!", reply_markup=ReplyKeyboardRemove())
+
+
+@dp.message_handler(state=Reg.deleted)
+async def for_deleted(message: types.Message):
+    await message.answer("Ваш аккаунт был удален. Для продолжения работы с ботом, пожалуйста, создайте новый аккаунт.\nЧтобы создать новый аккаунт нажмите /start")
+    return
 
 
 async def cleaning_db():

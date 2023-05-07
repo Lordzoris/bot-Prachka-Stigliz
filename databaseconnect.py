@@ -176,11 +176,24 @@ async def list_wash():
     return result
 
 
-async def change_number(tid, number):
+async def change_room(tid, number):
     conn = sqlite3.connect("database.db")
     cursor = conn.cursor()
     cursor.execute(
         "UPDATE users SET number = ?  WHERE id LIKE ?;", (number, tid,)
+    )
+    conn.commit()
+    conn.close()
+
+
+async def delete_account(tid):
+    conn = sqlite3.connect("database.db")
+    cursor = conn.cursor()
+    cursor.execute(
+            "DELETE FROM zapis WHERE id LIKE ?;", (tid,)
+    )
+    cursor.execute(
+            "DELETE FROM users WHERE id LIKE ?;", (tid,)
     )
     conn.commit()
     conn.close()
