@@ -35,7 +35,7 @@ keyboard_change = ReplyKeyboardMarkup(resize_keyboard=True)
 keyboard_change.add(b10).insert(b11).add(b12)
 
 keyboard_main = ReplyKeyboardMarkup(resize_keyboard=True)
-keyboard_main.add(b0).insert(b3).add(b4).insert(b13).add(b6)
+keyboard_main.add(b0).insert(b3).add(b4).insert(b6).add(b13)
 
 keyboard_record = ReplyKeyboardMarkup(resize_keyboard=True)
 keyboard_record.add(b1).insert(b2).add(b7)
