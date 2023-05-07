@@ -203,12 +203,12 @@ async def delete_old_record():
     conn = sqlite3.connect("database.db")
     cursor = conn.cursor()
     date_of_deletion = datetime.date.today()
-    formated_date = str(date_of_deletion.day).zfill(2)
-    formated_mounth = str(date_of_deletion.month).zfill(2)
-    date_formated = f'{formated_date},{formated_mounth}'
+    formatted_date = str(date_of_deletion.day).zfill(2)
+    formatted_month = str(date_of_deletion.month).zfill(2)
+    date_formatted = f'{formatted_date},{formatted_month}'
     cursor.execute(
         "DELETE FROM zapis WHERE date < ?;",
-        (date_formated,)
+        (date_formatted,)
     )
     conn.commit()
     conn.close()
