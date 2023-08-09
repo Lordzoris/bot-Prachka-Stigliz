@@ -1,5 +1,6 @@
 import datetime
 import sys
+import logging
 from aiogram.bot import bot
 from handlers.state import Reg, dp
 from aiogram import types
@@ -37,16 +38,14 @@ async def get_record(message: types.Message):
 async def process_callback_tomorrow(callback_query: types.CallbackQuery):
     res = await add_record_tomorrow(callback_query.data, callback_query.from_user.id)
     await Reg.record.set()
+    logging.info(f"res = {res}")
     if res == 0:
-        await bot.send_message(
-            callback_query.from_user.id, f"Мест на стирку на это время больше нет."
-        )
+        await callback_query.message.answer("Мест на стирку на это время больше нет.")
     elif res == 1:
-        await bot.send_message(callback_query.from_user.id, f"Вы записались на стирку!")
+        await callback_query.message.answer("Вы записались на стирку!")
     else:
-        await bot.send_message(
-            callback_query.from_user.id,
-            f"Вы уже записаны на стирку, записаться можно только на один временной слот.",
+        await callback_query.message.answer(
+            "Вы уже записаны на стирку, записаться можно только на один временной слот."
         )
     await Reg.record.set()
 
@@ -61,16 +60,14 @@ async def get_record_today(message: types.Message):
 async def process_callback_today(callback_query: types.CallbackQuery):
     res = await add_record_today(callback_query.data, callback_query.from_user.id)
     await Reg.record.set()
+    logging.info(f"res = {res}")
     if res == 0:
-        await bot.send_message(
-            callback_query.from_user.id, f"Мест на стирку на это время больше нет."
-        )
+        await callback_query.message.answer("Мест на стирку на это время больше нет.")
     elif res == 1:
-        await bot.send_message(callback_query.from_user.id, f"Вы записались на стирку!")
+        await callback_query.message.answer("Вы записались на стирку!")
     else:
-        await bot.send_message(
-            callback_query.from_user.id,
-            f"Вы уже записаны на стирку, записаться можно только на один временной слот.",
+        await callback_query.message.answer(
+            "Вы уже записаны на стирку, записаться можно только на один временной слот."
         )
 
 

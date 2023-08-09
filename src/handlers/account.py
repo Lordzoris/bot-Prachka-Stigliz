@@ -1,6 +1,8 @@
 import sys
 from handlers.state import Reg, dp
 from aiogram import types
+from aiogram.types import ReplyKeyboardRemove
+from aiogram.dispatcher import FSMContext
 
 sys.path.append('..')
 from db.databaseconnect import delete_account
@@ -20,7 +22,8 @@ async def delete_accounts(message: types.Message):
 
 
 @dp.message_handler(state=Reg.deleted)
-async def for_deleted(message: types.Message):
+async def for_deleted(message: types.Message, state: FSMContext):
     await message.answer(
         "Ваш аккаунт был удален. Для продолжения работы с ботом, пожалуйста, создайте новый аккаунт.\nЧтобы создать новый аккаунт нажмите /start")
+    await state.finish()
     return
