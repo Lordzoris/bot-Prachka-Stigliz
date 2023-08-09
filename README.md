@@ -118,3 +118,17 @@
         ```shell
         python3 ./src/main.py
         ```
+
+## Run via Docker
+
+1. Build image
+
+    ```shell
+    docker build -t bot .
+    ```
+
+2. Run container
+
+    ```shell
+    docker run -d --env TOKEN='YOUR_TOKEN_HERE' bot
+    ```
