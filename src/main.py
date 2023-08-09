@@ -18,12 +18,14 @@ from aiogram.utils import executor
 from aiogram.dispatcher.filters.state import StatesGroup, State
 from aiogram.contrib.fsm_storage.memory import MemoryStorage
 from apscheduler.schedulers.asyncio import AsyncIOScheduler
+import logging
 
 
 
 
 
 if __name__ == "__main__":
+    logging.basicConfig(level=logging.INFO)
     loop = asyncio.new_event_loop()
     asyncio.set_event_loop(loop)
     loop.run_until_complete(cleaning_db())

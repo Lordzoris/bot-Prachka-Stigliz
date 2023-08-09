@@ -1,4 +1,6 @@
+import os
 import sys
+import logging
 from handlers.state import Reg, dp
 sys.path.append('..')
 from db.databaseconnect import reg_connect, reg_test
@@ -14,7 +16,8 @@ async def command_start(message: types.Message):
         await message.answer("Привет!", reply_markup=keyboard_main)
         await Reg.record.set()
     else:
-        with open("../replicas/hello.txt", "r", encoding="UTF-8") as f:
+        logging.info(f"{os.getcwd()}")
+        with open("./src/replicas/hello.txt", "r", encoding="UTF-8") as f:
             await message.answer(f.read(), reply_markup=a)
         await Reg.name.set()
 
