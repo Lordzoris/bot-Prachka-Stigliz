@@ -1,5 +1,5 @@
 import sys
-from handlers.state import Reg, dp
+from states.state import Reg, dp
 from aiogram import types
 from aiogram.types import ReplyKeyboardRemove
 from aiogram.dispatcher import FSMContext

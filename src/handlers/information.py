@@ -1,5 +1,5 @@
 import sys
-from handlers.state import Reg, dp
+from states.state import Reg, dp
 from aiogram import types
 sys.path.append('..')
 from db.databaseconnect import check_record_user, list_wash

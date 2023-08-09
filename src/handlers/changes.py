@@ -1,5 +1,5 @@
 import sys
-from handlers.state import Reg, dp
+from states.state import Reg, dp
 from aiogram import Bot, types
 from aiogram.dispatcher import Dispatcher, FSMContext
 sys.path.append('..')
