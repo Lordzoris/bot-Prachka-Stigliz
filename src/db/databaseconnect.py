@@ -1,7 +1,6 @@
 import sqlite3
 from _datetime import *
 import datetime
-from typing import Union
 
 
 async def reg_connect(tid, name, number):
@@ -32,7 +31,7 @@ async def get_count():
     conn.close()
 
 
-async def add_record_tomorrow(time, tid) -> Union[bool, int]:
+async def add_record_tomorrow(time, tid):
     conn = sqlite3.connect("database.db")
     cursor = conn.cursor()
     select_id = cursor.execute(
@@ -76,7 +75,7 @@ async def add_record_tomorrow(time, tid) -> Union[bool, int]:
             return 1
 
 
-async def add_record_today(time, tid) -> Union[bool, int]:
+async def add_record_today(time, tid):
     conn = sqlite3.connect("database.db")
     cursor = conn.cursor()
     select_id = cursor.execute(
