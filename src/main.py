@@ -8,7 +8,7 @@ from handlers.changes import *
 from handlers.information import *
 from handlers.record import *
 from handlers.registration import *
-from handlers.state import *
+from states.state import *
 from keyboards.but import *
 from keyboards.keyboards import *
 from aiogram import Bot, types

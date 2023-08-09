@@ -1,7 +1,7 @@
 import os
 import sys
 import logging
-from handlers.state import Reg, dp
+from states.state import Reg, dp
 sys.path.append('..')
 from db.databaseconnect import reg_connect, reg_test
 from keyboards.keyboards import keyboard_main, keyboard_confirm, keyboard_change
