@@ -51,27 +51,70 @@
 
 
 4. Create SQL tables
-    
-        - For Windows:
-    
-            ```Powershell
-            sqlite3 database.db
-            ```
 
-            ```sql
-            CREATE TABLE records(time TEXT, date TEXT, id TEXT)
-            CREATE TABLE users( id TEXT, name TEXT, number INTEGER)
-            ```
+    - For Windows:
 
-        - For Linux, MacOS:
+        ```powershell
+        sqlite3 database.db
+        ```
+        ---
+        ```sql
+        CREATE TABLE records(time TEXT, date TEXT, id TEXT)
+        CREATE TABLE users( id TEXT, name TEXT, number INTEGER)
+        ```
 
-            ```bash
-            sqlite3 database.db
-            ```
+    - For Linux, MacOS:
 
-            ```sql    
-            CREATE TABLE records(time TEXT, date TEXT, id TEXT);
-            CREATE TABLE users( id TEXT, name TEXT, number INTEGER);
-            ```
+        ```bash
+        sqlite3 database.db
+        ```
+        ---
+        ```sql    
+        CREATE TABLE records(time TEXT, date TEXT, id TEXT);
+        CREATE TABLE users( id TEXT, name TEXT, number INTEGER);
+        ```
 
 ## Running the bot
+
+1. Activate virtual environment
+
+    - For Windows:
+    
+        ```powershell
+        .\.venv\Scripts\activate
+        ```
+
+    - For Linux, MacOS:
+
+        ```bash
+        source ./.venv/bin/activate
+        ```
+
+2. Setting environment variables
+
+    - For Windows:
+
+        ```Powershell
+        $env:TOKEN = "TOKEN_TO_YOUR_BOT";
+        ```
+        
+
+    - For Linux, MacOS:
+
+        ```shell
+        export TOKEN="TOKEN_TO_YOUR_BOT"
+        ```
+
+3. Run bot
+
+    - For Windows:
+
+        ```shell
+        python .\src\main.py
+        ```
+
+    - For Linux, MacOS:
+
+        ```shell
+        python3 ./src/main.py
+        ```
